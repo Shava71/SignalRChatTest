@@ -1,0 +1,27 @@
+@model SignalRChatTest.Contracts.LoginRequest
+
+@{
+    ViewBag.Title = "Login";
+    Layout = "_Layout";
+}
+
+<div class="vstack gap-3" >
+    <h2>Авторизация</h2>
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <form asp-controller="Auth" asp-action="Login" method="post" class="vstack gap-3">
+        <div class="vstack">
+            <input type="text" asp-for="Email" placeholder="@Html.DisplayNameFor(m => m.Email)">
+            <span class="text-danger" asp-validation-for="Email"></span>
+        </div>
+        <div class="vstack">
+            <input type="text" asp-for="Password" placeholder="@Html.DisplayNameFor(m => m.Password)">
+            <span class="text-danger" asp-validation-for="Password"></span>
+        </div>
+        <input type="hidden" asp-for="Roles" value="none"/>
+        <input type="submit" value="Войти"/>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

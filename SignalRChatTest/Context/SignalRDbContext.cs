@@ -1,0 +1,24 @@
+using Microsoft.EntityFrameworkCore;
+using SignalRChatTest.Migrations;
+
+namespace SignalRChatTest.Context;
+
+public class SignalRDbContext : DbContext
+{
+    public DbSet<User> Users { get; set; }
+    
+    // private readonly IConfiguration _configuration;
+
+    public SignalRDbContext(DbContextOptions<SignalRDbContext> options) : base(options)
+    { }
+
+    // SignalRDbContext(IConfiguration configuration)
+    // {
+    //     _configuration = configuration;
+    // }
+
+    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    // {
+    //     optionsBuilder.UseNpgsql(_configuration.GetConnectionString("DefaultConnection"));
+    // }
+}

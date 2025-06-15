@@ -1,0 +1,86 @@
+﻿@using System.Security.Claims
+@{
+    var username = User.FindFirst(ClaimTypes.Name)?.Value;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>@ViewData["Title"] - SignalRChatTest</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/SignalRChatTest.styles.css" asp-append-version="true"/>
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <div class="container-fluid">
+            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SignalRChatTest</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                <ul class="navbar-nav flex-grow-1">
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                    </li>
+                </ul>
+                @* <partial name="_LoginPartial"/> *@
+            </div>
+        </div>
+        @if(username is null)
+        {
+            <div class="container-fluid d-flex justify-content-end">
+                <div class="btn-group gap-3" role="auth">
+                    <form asp-controller="Auth" asp-action="Login" method="get">
+                        <input type="submit" class="btn btn-primary" value="Войти"/>
+                    </form>
+                    <form asp-controller="Auth" asp-action="Register" method="get">
+                        <input type="submit" class="btn btn-info" value="Зарегистрироваться"/>
+                    </form>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="container-fluid d-flex justify-content-end">
+                <div class="btn-group dropstart">
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonAccount" data-bs-toggle="dropdown" aria-expanded="false">
+                            @username
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonAccount">
+                            <form asp-action="Logout" asp-controller="Auth" method="post">
+                                <input type="submit" class="dropdown-item btn btn-link" value="Выйти"/>
+                            </form>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        }
+    </nav>
+</header>
+<div class="container">
+    <main role="main" class="pb-3">
+        @RenderBody()
+    </main>
+</div>
+
+<footer class="border-top footer text-muted">
+    <div class="container">
+        &copy; 2025 - SignalRChatTest - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    </div>
+</footer>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

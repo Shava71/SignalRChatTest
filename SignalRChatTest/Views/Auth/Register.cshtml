@@ -1,0 +1,29 @@
+@model SignalRChatTest.Contracts.RegisterRequest
+
+@{
+    ViewBag.Title = "Register";
+    Layout = "_Layout";
+}
+
+<div class="vstack gap-3" >
+    <h2>Регистрация</h2>
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <form asp-controller="Auth" asp-action="Register" method="post" class="vstack gap-3">
+        <div class="vstack">
+            <input type="text" asp-for="Username" placeholder="@Html.DisplayNameFor(m => m.Username)">
+            <span class="text-danger" asp-validation-for="Username"></span>
+        </div>
+        <div class="vstack">
+            <input type="text" asp-for="Email" placeholder="@Html.DisplayNameFor(m => m.Email)">
+            <span class="text-danger" asp-validation-for="Email"></span>
+        </div>
+        <div class="vstack">
+            <input type="text" asp-for="Password" placeholder="@Html.DisplayNameFor(m => m.Password)">
+            <span class="text-danger" asp-validation-for="Password"></span>
+        </div>
+
+        <input type="submit" value="Зарегистрироваться"/>
+    </form>
+</div>
+
+
