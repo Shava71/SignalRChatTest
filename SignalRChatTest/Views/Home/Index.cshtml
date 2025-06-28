@@ -1,8 +1,71 @@
-﻿@{
+﻿@using System.Security.Claims
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@{
+    var username = User.FindFirst(ClaimTypes.Name)?.Value;
+    var userid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+}
+
+@if (username is not null)
+{
+    <div class="container">
+        <div class="row d-block">
+            <div class="col">
+                <h2>Чат в реальном времени</h2>
+                <div class="form-group">
+                    <label for="userInput">Ваше имя: @username</label>
+                    <input type="hidden" id="userId" value="@userid"></input>
+                    <input type="hidden" id="userInput" class="form-control" value="@username"/>
+                </div>
+                <div class="form-group d-flex align-items-end gap-2">
+                    <div class="flex-grow-1">
+                        <label for="messageInput">Сообщение:</label>
+                        <input type="text" id="messageInput" class="form-control"/>
+                    </div>
+                    <div>
+                        <label>&nbsp;</label> <!-- чтобы выровнять по нижнему краю -->
+                        <button id="sendButton" class="btn btn-primary d-block">Отправить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="margin-top: 20px;">
+            <div class="col-md-8">
+                <h3>Общий чат</h3>
+                <ul id="messagesList" class="list-group"></ul>
+            </div>
+            <div class="col-md-4">
+                <h3>Пользователи в сети</h3>
+                <ul id="userList" class="list-group"></ul>
+            </div>
+        </div>
+    </div>
+    
+    <div id="privateMessageModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border: 1px solid #ccc; box-shadow: 0 0 10px rgba(0,0,0,0.3);">
+        <h4>Отправить приватное сообщение</h4>
+        <div class="form-group">
+            <label for="recipientInput">Получатель:</label>
+            <input type="text" id="recipientInput" class="form-control" readonly />
+            <input type="hidden" id="recipientInputId" class="form-control"/>
+        </div>
+        <div class="form-group">
+            <label for="privateMessageInput">Сообщение:</label>
+            <input type="text" id="privateMessageInput" class="form-control" />
+        </div>
+        <button id="sendPrivateButton" class="btn btn-primary">Отправить</button>
+        <button id="cancelPrivateButton" class="btn btn-secondary" onclick="document.getElementById('privateMessageModal').style.display = 'none';">Отмена</button>
+    </div>
+}
+else
+{
+    <div class="justify-content-center text-danger">
+        <p>Для чата необходимо авторизироваться</p>
+    </div>
+}
+
+@section Scripts {
+        <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
+        <script src="~/js/chat.js"></script>
+    }

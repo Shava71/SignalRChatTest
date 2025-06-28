@@ -20,7 +20,13 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> CheckUserIsRegistered(string email, string password)
     {
-        return await _dbContext.Users.Where(u => u.Email == email && u.Password == password).FirstOrDefaultAsync();
+        User? user = await _dbContext.Users.Where(u => u.Email == email)
+            .FirstOrDefaultAsync();
+        if (BCrypt.Net.BCrypt.Verify(password, user?.Password))
+        {
+            return user;
+        }
+        else return null;
     }
 
     public async Task AddUserAsync(User user)

@@ -1,12 +1,17 @@
 using System.Text;
+using MessagePack;
+using MessagePack.Resolvers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SignalRChatTest.Context;
 using SignalRChatTest.Data;
+using SignalRChatTest.Hub;
 using SignalRChatTest.Repositories;
 using SignalRChatTest.Service;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +28,9 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<SignalRDbContext>(options => options.UseNpgsql(connectionString));
 // builder.Services.AddScoped<SignalRDbContext>();
+builder.Services.AddSingleton<IConnectionMultiplexer>(con =>
+    ConnectionMultiplexer.Connect("localhost"));
+builder.Services.AddSingleton<IRedisService, RedisService>();
 
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
 var signingKey = new SymmetricSecurityKey(key);
@@ -70,6 +78,14 @@ builder.Services.AddAuthentication(options =>
         };
     });
 builder.Services.AddAuthorization();
+
+builder.Services.AddSignalR()
+    .AddMessagePackProtocol(options =>
+    {
+        options.SerializerOptions = MessagePackSerializerOptions.Standard
+            .WithResolver(StaticCompositeResolver.Instance)
+            .WithSecurity(MessagePackSecurity.UntrustedData);
+    });
 
 // repositories DI
 {
@@ -119,7 +135,16 @@ app.MapControllerRoute(
         pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+app.MapHub<ChatHub>("/chat");
+
+
 app.MapRazorPages()
     .WithStaticAssets();
+
+app.UseForwardedHeaders(new ForwardedHeadersOptions {
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+app.UseHttpsRedirection();
+app.UseHsts();
 
 app.Run();

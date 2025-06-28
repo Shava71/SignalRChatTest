@@ -18,10 +18,12 @@
             <span class="text-danger" asp-validation-for="Password"></span>
         </div>
         <input type="hidden" asp-for="Roles" value="none"/>
-        <input type="submit" value="Войти"/>
+        <input id="loginButton" type="submit" value="Войти"/>
     </form>
 </div>
 
 @section Scripts {
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
+    <script src="~/js/chat.js"></script>
     <partial name="_ValidationScriptsPartial" />
 }

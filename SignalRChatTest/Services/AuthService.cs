@@ -29,7 +29,7 @@ public class AuthService : IAuthService
             Id = Guid.NewGuid(),
             Username = registerRequest.Username,
             Email = registerRequest.Email,
-            Password = registerRequest.Password,
+            Password = BCrypt.Net.BCrypt.HashPassword(registerRequest.Password),
         };
         
         await _userRepository.AddUserAsync(user);

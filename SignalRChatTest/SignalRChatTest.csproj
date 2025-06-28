@@ -5,18 +5,28 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>aspnet-SignalRChatTest-e64948ed-664e-46d5-8247-f00b7c4e3485</UserSecretsId>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.6" />
         <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.5"/>
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.5"/>
         <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.5"/>
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="9.0.6" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.5"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.5"/>
         <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.12.0" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+        <PackageReference Include="StackExchange.Redis" Version="2.8.41" />
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.12.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
     </ItemGroup>
 
 </Project>
