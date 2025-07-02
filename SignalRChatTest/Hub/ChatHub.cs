@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using SignalRChatTest.DTO;
 using SignalRChatTest.Migrations;
 using SignalRChatTest.Models;
 using SignalRChatTest.Service;
@@ -11,29 +12,36 @@ namespace SignalRChatTest.Hub;
 public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
 {
     private static Dictionary<string, ChatUser> _connections = new Dictionary<string, ChatUser>();
-    private static readonly IRedisService _redis;
+    private IRedisService _redis;
+    private IChatHistoryService _chatHistoryService;
 
-    // public async Task RegisterUser(string userid, string username)
-    // {
-    //     var connectionId = Context.ConnectionId;
-    //     var chatUser = new ChatUser()
-    //     {
-    //         Id = Guid.Parse(userid),
-    //         Username = username,
-    //         ConnectionId = connectionId
-    //     };
-    //     _connections[connectionId] = chatUser;
-    //     
-    //     await Clients.All.SendAsync("UpdateUserList", _connections.Values.Select(u => new
-    //     {
-    //         Username = u.Username,
-    //         Id = u.Id.ToString(),
-    //     }));
-    // }
+    public ChatHub(IChatHistoryService chatHistoryService)
+    {
+        // _redis = redis;
+        _chatHistoryService = chatHistoryService;
+    }
+    
+    public async Task GetMessageHistory()
+    {
+        List<MessageHistoryDto>? messages = await _chatHistoryService.GetChatHistory();
+        await Clients.Caller.SendAsync("ReceiveMessageHistory", messages);
+    }
     
     public async Task SendMessage(string name, string message)
     {
-        await Clients.All.SendAsync("ReceiveMessage", name, message);
+        ChatUser _fromUser = _connections.FirstOrDefault(x => x.Key == Context.ConnectionId).Value;
+        ChatMessage chatMessage = new()
+        {
+            Id = Guid.NewGuid(),
+            UserId = _fromUser.Id,
+            Message = message,
+            Timestamp = DateTime.UtcNow,
+            IsPrivate = false,
+            Recipient = null,
+        };
+        
+        await _chatHistoryService.AddMessage(chatMessage);
+        await Clients.All.SendAsync("ReceiveMessage", name, message, chatMessage.Timestamp);
     }
 
     public async Task SendPrivateMessage(string toUser, string message)
@@ -41,9 +49,21 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
         ChatUser _fromUser = _connections.FirstOrDefault(x => x.Key == Context.ConnectionId).Value;
         
         ChatUser _toUser = _connections.FirstOrDefault(x => x.Value.Id == Guid.Parse(toUser)).Value;
+
+        ChatMessage chatMessage = new()
+        {
+            Id = Guid.NewGuid(),
+            UserId = _fromUser.Id,
+            Message = message,
+            Timestamp = DateTime.UtcNow,
+            IsPrivate = true,
+            Recipient = _toUser.Id,
+        };
         
-        await Clients.Client(_toUser.ConnectionId).SendAsync("ReceivePrivateMessage", _fromUser, message);
-        await Clients.Caller.SendAsync("ReceivePrivateMessage", _fromUser, message);
+        await _chatHistoryService.AddMessage(chatMessage);
+        
+        await Clients.Client(_toUser.ConnectionId).SendAsync("ReceivePrivateMessage", _fromUser, message, chatMessage.Timestamp);
+        await Clients.Caller.SendAsync("ReceivePrivateMessage", _fromUser, message, chatMessage.Timestamp);
        
     }
     

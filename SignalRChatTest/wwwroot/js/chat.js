@@ -1,6 +1,7 @@
 // Создаем подключение к хабу
 const connection = new signalR.HubConnectionBuilder()
     .withUrl("/chat")
+    .withAutomaticReconnect()
     .configureLogging(signalR.LogLevel.Information)
     .build();
 
@@ -71,25 +72,32 @@ document.getElementById("sendButton").addEventListener("click", function (event)
 });
 
 // Начинаем соединение
-connection.start().then(function (){
-    const userid = document.getElementById("userId").value;
-    const username = document.getElementById("userInput").value;
-
-    console.log("Registering user:", { userid, username });
-    // Регистрируем пользователя на сервере
-    connection.invoke("RegisterUser", userid, username).catch(function (err) {
+connection.start()
+//     .then(function (){
+//     const userid = document.getElementById("userId").value;
+//     const username = document.getElementById("userInput").value;
+//
+//     console.log("Registering user:", { userid, username });
+//     // Регистрируем пользователя на сервере
+//     connection.invoke("RegisterUser", userid, username).catch(function (err) {
+//         return console.error(err.toString());
+//     });
+// })
+//     .catch(function (err) {
+//     return console.error(err.toString());
+// })
+    .then(function() {
+    connection.invoke("GetMessageHistory").catch(function (err) {
         return console.error(err.toString());
     });
-
-})
-    .catch(function (err) {
+}).catch(function (err) {
     return console.error(err.toString());
 });
 
 
 // Обработчик получения приватного сообщения
 connection.on("ReceivePrivateMessage", function (from, message) {
-    const encodedMsg = `[Приватно от ${from}]: ${message}`;
+    const encodedMsg = `[Приватно от ${from.username}]: ${message}`;
     const li = document.createElement("li");
     li.classList.add("list-group-item", "private-message");
     li.textContent = encodedMsg;
@@ -151,15 +159,34 @@ document.getElementById("sendPrivateButton").addEventListener("click", function 
     event.preventDefault();
 });
 
-// // Регистрация пользователя при входе в чат
-// document.getElementById("loginButton").addEventListener("click", function (event) {
-//     // const userId = document.getElementById("userId").value;
-//
-//         connection.invoke("RegisterUser").catch(function (err) {
-//             return console.error(err.toString());
-//         });
-//
-//         // document.getElementById("registrationForm").style.display = "none";
-//         // document.getElementById("chatForm").style.display = "block";
-//     event.preventDefault();
-// }
+// Обработчик получения истории сообщений
+connection.on("ReceiveMessageHistory", function (messages) {
+    const messagesList = document.getElementById("messagesList");
+    messagesList.innerHTML = ""; // Очищаем текущий список
+    console.log("History messages", messages);
+
+    messages.forEach(msg => {
+        const encodedMsg = formatMessage(msg);
+        const li = document.createElement("li");
+        li.classList.add("list-group-item");
+
+        if (msg.isPrivate) {
+            li.classList.add("private-message");
+        }
+
+        li.textContent = encodedMsg;
+        messagesList.appendChild(li);
+    });
+});
+
+// Функция форматирования сообщения
+function formatMessage(msg) {
+    const date = new Date(msg.timestamp);
+    const timeString = date.toLocaleTimeString();
+
+    if (msg.isPrivate) {
+        return `[${timeString}] [Приватно ${msg.username} -> ${msg.recipient}]: ${msg.message}`;
+    } else {
+        return `[${timeString}] ${msg.username}: ${msg.message}`;
+    }
+}

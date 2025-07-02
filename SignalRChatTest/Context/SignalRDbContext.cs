@@ -1,11 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using SignalRChatTest.Migrations;
+using SignalRChatTest.Models;
 
 namespace SignalRChatTest.Context;
 
 public class SignalRDbContext : DbContext
 {
     public DbSet<User> Users { get; set; }
+    public DbSet<ChatMessage> ChatMessages { get; set; }
     
     // private readonly IConfiguration _configuration;
 

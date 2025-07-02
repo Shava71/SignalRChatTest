@@ -90,12 +90,15 @@ builder.Services.AddSignalR()
 // repositories DI
 {
     builder.Services.AddScoped<IUserRepository, UserRepository>();
+    builder.Services.AddScoped<IMessageRepository, MessageReposiory>();
+
 }
 
 // services DI
 {
     builder.Services.AddSingleton<JwtService>();
     builder.Services.AddScoped<IAuthService, AuthService>();
+    builder.Services.AddScoped<IChatHistoryService, ChatHistoryService>();
 }
 
 

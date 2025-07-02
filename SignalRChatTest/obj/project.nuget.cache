@@ -1,12 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "7tA91g7kEY4=",
+  "dgSpecHash": "ehVlzqklT9A=",
   "success": true,
   "projectFilePath": "/Users/mac/Desktop/pets/SignalRChatTest/SignalRChatTest/SignalRChatTest.csproj",
   "expectedPackageFiles": [
     "/Users/mac/.nuget/packages/azure.core/1.38.0/azure.core.1.38.0.nupkg.sha512",
     "/Users/mac/.nuget/packages/azure.identity/1.11.4/azure.identity.1.11.4.nupkg.sha512",
     "/Users/mac/.nuget/packages/bcrypt.net-next/4.0.3/bcrypt.net-next.4.0.3.nupkg.sha512",
+    "/Users/mac/.nuget/packages/dapper/2.1.66/dapper.2.1.66.nupkg.sha512",
     "/Users/mac/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",
     "/Users/mac/.nuget/packages/messagepack/2.5.187/messagepack.2.5.187.nupkg.sha512",
     "/Users/mac/.nuget/packages/messagepack.annotations/2.5.187/messagepack.annotations.2.5.187.nupkg.sha512",

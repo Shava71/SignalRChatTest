@@ -311,4 +311,5 @@
 /Users/mac/Desktop/pets/SignalRChatTest/SignalRChatTest/bin/Debug/net9.0/BCrypt.Net-Next.dll
 /Users/mac/Desktop/pets/SignalRChatTest/SignalRChatTest/bin/Debug/net9.0/Pipelines.Sockets.Unofficial.dll
 /Users/mac/Desktop/pets/SignalRChatTest/SignalRChatTest/bin/Debug/net9.0/StackExchange.Redis.dll
-/Users/mac/Desktop/pets/SignalRChatTest/SignalRChatTest/obj/Debug/net9.0/compressed/53y0lo58qf-maxw2ecgnw.gz
+/Users/mac/Desktop/pets/SignalRChatTest/SignalRChatTest/obj/Debug/net9.0/compressed/53y0lo58qf-18ll9td2mx.gz
+/Users/mac/Desktop/pets/SignalRChatTest/SignalRChatTest/bin/Debug/net9.0/Dapper.dll
