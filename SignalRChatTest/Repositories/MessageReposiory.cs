@@ -60,18 +60,19 @@ public class MessageReposiory : IMessageRepository
         //     .ToList();
         
         List<MessageHistoryDto>? result = new List<MessageHistoryDto>();
+        
         string connString = this._configuration.GetConnectionString("DefaultConnection")!;
         using (IDbConnection db = new NpgsqlConnection(connString))
         {
             string sql =
-                @"SELECT c.""Id"", u.""Username"" AS ""UserName"", c.""Message"", c.""Timestamp"", c.""IsPrivate"", u0.""Username"" AS ""Recipient""
+                @"SELECT c.""Id"", u.""Username"" AS ""UserName"",c.""UserId"" , c.""Message"", 
+                  c.""Timestamp"", c.""IsPrivate"", u0.""Username"" AS ""Recipient"", c.""Recipient"" AS ""RecipientID""
                 FROM ""ChatMessages"" AS c
                          Left JOIN ""Users"" AS u ON c.""UserId"" = u.""Id""
                          Left JOIN ""Users"" AS u0 ON c.""Recipient"" = u0.""Id"";";
 
             result = await db.QueryAsync<MessageHistoryDto>(sql) as List<MessageHistoryDto>;
         }
-        result = result.Where(res => res.IsPrivate == true ?? res.).ToList();
         
         return result;
     }

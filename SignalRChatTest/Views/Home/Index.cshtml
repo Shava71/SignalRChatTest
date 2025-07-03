@@ -14,6 +14,7 @@
         <div class="row d-block">
             <div class="col">
                 <h2>Чат в реальном времени</h2>
+                <div id="connectionStatus" style="color: green;">Соединение установлено</div>
                 <div class="form-group">
                     <label for="userInput">Ваше имя: @username</label>
                     <input type="hidden" id="userId" value="@userid"></input>
@@ -34,7 +35,9 @@
         <div class="row" style="margin-top: 20px;">
             <div class="col-md-8">
                 <h3>Общий чат</h3>
+                <div id="typingIndicator" style="display: none; font-style: italic; color: #888;"></div>
                 <ul id="messagesList" class="list-group"></ul>
+                @* <p id="typingIndicator" style="display: none"></p> *@
             </div>
             <div class="col-md-4">
                 <h3>Пользователи в сети</h3>

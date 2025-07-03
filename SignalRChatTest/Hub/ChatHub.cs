@@ -23,8 +23,20 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
     
     public async Task GetMessageHistory()
     {
-        List<MessageHistoryDto>? messages = await _chatHistoryService.GetChatHistory();
+        Guid currentUserId = Guid.Parse(Context.User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        List<MessageHistoryDto>? messages = await _chatHistoryService.GetChatHistory(currentUserId);
         await Clients.Caller.SendAsync("ReceiveMessageHistory", messages);
+    }
+
+    public async Task UserIsTyping()
+    {
+        string currentUserName = Context.User.FindFirst(ClaimTypes.Name)!.Value;
+        await Clients.Others.SendAsync("UserTyping", currentUserName);
+    }
+    public async Task UserStoppedTyping()
+    {
+        string currentUserName = Context.User.FindFirst(ClaimTypes.Name)!.Value;
+        await Clients.Others.SendAsync("UserStoppedTyping", currentUserName);
     }
     
     public async Task SendMessage(string name, string message)

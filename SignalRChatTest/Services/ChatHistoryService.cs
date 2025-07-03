@@ -15,7 +15,7 @@ public class ChatHistoryService : IChatHistoryService
         _messageRepository = messageRepository;
     }
 
-    public async Task<List<MessageHistoryDto>?> GetChatHistory()
+    public async Task<List<MessageHistoryDto>?> GetChatHistory(Guid userId)
     {
         // List<ChatMessage> messages = await _messageRepository.GetAllMessages();
         // List<User> users = await _messageRepository.GettAllUsers();
@@ -36,6 +36,11 @@ public class ChatHistoryService : IChatHistoryService
         //     })
         //     .ToList();
         var messages = await _messageRepository.GetChatHistory();
+        
+        messages = messages.Where(res => 
+            (res.IsPrivate & (res.UserId == userId || res.RecipientID == userId))
+            || !res.IsPrivate)
+            .ToList();
         
         return messages.Count > 0 ? messages : null;
     }

@@ -1,7 +1,7 @@
 // Создаем подключение к хабу
 const connection = new signalR.HubConnectionBuilder()
     .withUrl("/chat")
-    .withAutomaticReconnect()
+    .withAutomaticReconnect([0, 2000, 10000, 30000])
     .configureLogging(signalR.LogLevel.Information)
     .build();
 
@@ -185,8 +185,68 @@ function formatMessage(msg) {
     const timeString = date.toLocaleTimeString();
 
     if (msg.isPrivate) {
-        return `[${timeString}] [Приватно ${msg.username} -> ${msg.recipient}]: ${msg.message}`;
+        return `[${timeString}] [Приватно ${msg.userName} -> ${msg.recipient}]: ${msg.message}`;
     } else {
-        return `[${timeString}] ${msg.username}: ${msg.message}`;
+        return `[${timeString}] ${msg.userName}: ${msg.message}`;
     }
 }
+
+let typingTimer;
+const doneTypingInterval = 1000; // время в мс, после которого считаем, что пользователь закончил печатать
+
+document.getElementById("messageInput").addEventListener("keydown", function (event) {
+    clearTimeout(typingTimer);
+    
+    connection.invoke("UserIsTyping").catch(function (err) {
+        return console.error(err.toString());
+    })
+});
+
+// Оповещаем сервер, когда пользователь закончил печатать
+document.getElementById("messageInput").addEventListener("keyup", function() {
+    clearTimeout(typingTimer);
+
+    const username = document.getElementById("userInput").value;
+    typingTimer = setTimeout(function() {
+        connection.invoke("UserStoppedTyping").catch(function (err) {
+            return console.error(err.toString());
+        });
+    }, doneTypingInterval);
+});
+
+// Обработчик события "пользователь печатает"
+connection.on("UserTyping", function (username) {
+    const typingIndicator = document.getElementById("typingIndicator");
+    typingIndicator.textContent = `${username} печатает...`;
+    typingIndicator.style.display = "block";
+});
+
+// Обработчик события "пользователь закончил печатать"
+connection.on("UserStoppedTyping", function (username) {
+    const typingIndicator = document.getElementById("typingIndicator");
+    typingIndicator.style.display = "none";
+});
+
+// Обработчики состояния соединения
+connection.onreconnecting(error => {
+    const statusMessage = `Соединение потеряно. Переподключение... Ошибка: ${error}`;
+    document.getElementById("connectionStatus").textContent = statusMessage;
+    document.getElementById("connectionStatus").style.color = "orange";
+});
+
+connection.onreconnected(connectionId => {
+    const statusMessage = `Соединение восстановлено. ID: ${connectionId}`;
+    document.getElementById("connectionStatus").textContent = statusMessage;
+    document.getElementById("connectionStatus").style.color = "green";
+
+    // Запрашиваем историю сообщений и список пользователей заново
+    connection.invoke("GetMessageHistory").catch(function (err) {
+        return console.error(err.toString());
+    });
+});
+
+connection.onclose(error => {
+    const statusMessage = `Соединение закрыто. Обновите страницу для повторного подключения.`;
+    document.getElementById("connectionStatus").textContent = statusMessage;
+    document.getElementById("connectionStatus").style.color = "red";
+});
