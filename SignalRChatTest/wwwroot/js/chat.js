@@ -2,6 +2,7 @@
 const connection = new signalR.HubConnectionBuilder()
     .withUrl("/chat")
     .withAutomaticReconnect([0, 2000, 10000, 30000])
+    // .withHubProtocol(new signalR.protocols.msgpack.MessagePackHubProtocol())
     .configureLogging(signalR.LogLevel.Information)
     .build();
 

@@ -29,7 +29,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<SignalRDbContext>(options => options.UseNpgsql(connectionString));
 // builder.Services.AddScoped<SignalRDbContext>();
 builder.Services.AddSingleton<IConnectionMultiplexer>(con =>
-    ConnectionMultiplexer.Connect("localhost"));
+    ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("RedisConnection")));
 builder.Services.AddSingleton<IRedisService, RedisService>();
 
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
@@ -68,7 +68,14 @@ builder.Services.AddAuthentication(options =>
         {
             OnMessageReceived = context =>
             {
-                if (context.Request.Cookies.ContainsKey("jwt"))
+                 string accessToken = context.Request.Query["access_token"];
+                 string path = context.HttpContext.Request.Path;
+
+                if (!string.IsNullOrEmpty(accessToken) && (path.StartsWith("/chat") || path.StartsWith("/voicechat")))
+                {
+                  context.Token = accessToken;    
+                }
+                else if (context.Request.Cookies.ContainsKey("jwt"))
                 {
                     context.Token = context.Request.Cookies["jwt"];
                 }
@@ -80,11 +87,19 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 builder.Services.AddSignalR()
-    .AddMessagePackProtocol(options =>
+    // .AddStackExchangeRedis(builder.Configuration.GetConnectionString("RedisConnection"), options =>
+    // {
+    //     options.Configuration.ChannelPrefix = "SignalRChat";
+    // })
+    // .AddMessagePackProtocol(options =>
+    // {
+    //     options.SerializerOptions = MessagePackSerializerOptions.Standard
+    //         .WithResolver(StaticCompositeResolver.Instance)
+    //         .WithSecurity(MessagePackSecurity.UntrustedData);
+    // })
+    .AddHubOptions<ChatHub>(options =>
     {
-        options.SerializerOptions = MessagePackSerializerOptions.Standard
-            .WithResolver(StaticCompositeResolver.Instance)
-            .WithSecurity(MessagePackSecurity.UntrustedData);
+        options.EnableDetailedErrors = true;
     });
 
 // repositories DI
@@ -100,7 +115,6 @@ builder.Services.AddSignalR()
     builder.Services.AddScoped<IAuthService, AuthService>();
     builder.Services.AddScoped<IChatHistoryService, ChatHistoryService>();
 }
-
 
 
 var app = builder.Build();
@@ -129,6 +143,7 @@ else
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
@@ -139,6 +154,7 @@ app.MapControllerRoute(
     .WithStaticAssets();
 
 app.MapHub<ChatHub>("/chat");
+app.MapHub<VoiceHub>("/voicechat");
 
 
 app.MapRazorPages()

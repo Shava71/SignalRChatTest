@@ -88,8 +88,9 @@ public class AuthController : Controller
             Response.Cookies.Append("jwt", jwt, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                Secure = false,
                 SameSite = SameSiteMode.Strict,
+                // SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddHours(1)
             });
             

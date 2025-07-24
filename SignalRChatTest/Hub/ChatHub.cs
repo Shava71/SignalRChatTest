@@ -15,9 +15,9 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
     private IRedisService _redis;
     private IChatHistoryService _chatHistoryService;
 
-    public ChatHub(IChatHistoryService chatHistoryService)
+    public ChatHub(IChatHistoryService chatHistoryService, IRedisService redis)
     {
-        // _redis = redis;
+        _redis = redis;
         _chatHistoryService = chatHistoryService;
     }
     
@@ -81,16 +81,32 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
     
     public override async Task OnConnectedAsync()
     {
+        if (Context.User?.Identity == null || !Context.User.Identity.IsAuthenticated)
+        {
+            Console.WriteLine("❌ Пользователь не аутентифицирован");
+            throw new HubException("Unauthorized");
+        }
+        
         string userid = Context.User!.FindFirst(ClaimTypes.NameIdentifier)!.Value;
         string username = Context.User.FindFirst(ClaimTypes.Name)!.Value;
         
         var connectionId = Context.ConnectionId;
-        var chatUser = new ChatUser()
+        ChatUser chatUser; ChatUser? prevUser = await _redis.GetValueAsync<ChatUser>($"user:{userid}:connection");
+        if (prevUser != null)
         {
-            Id = Guid.Parse(userid),
-            Username = username,
-            ConnectionId = connectionId
-        };
+            chatUser = prevUser;
+            chatUser.ConnectionId = connectionId;
+        }
+        else
+        {
+            chatUser = new ChatUser()
+            {
+                Id = Guid.Parse(userid),
+                Username = username,
+                ConnectionId = connectionId
+            };
+        }
+        
         _connections[connectionId] = chatUser;
         
         await Clients.All.SendAsync("UpdateUserList", _connections.Values.Select(u => new
@@ -98,6 +114,9 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
             Username = u.Username,
             Id = u.Id.ToString(),
         }));
+
+        string key = $"user:{userid}:connection";
+        await _redis.SetValueAsync(key, chatUser);
         
         await Clients.All.SendAsync("UserConnected", chatUser.Username);
         await base.OnConnectedAsync();

@@ -60,6 +60,13 @@
         <button id="sendPrivateButton" class="btn btn-primary">Отправить</button>
         <button id="cancelPrivateButton" class="btn btn-secondary" onclick="document.getElementById('privateMessageModal').style.display = 'none';">Отмена</button>
     </div>
+    
+    <div class="WebRTCVoiceChat">
+        <button id="startCallBtn" class="btn btn-info">Начать звонок</button>
+        <h1>Video Chat</h1>
+        <video id="localVideo" autoplay playsinline muted></video>
+        <video id="remoteVideo" autoplay playsinline></video>
+    </div>
 }
 else
 {
@@ -69,6 +76,17 @@ else
 }
 
 @section Scripts {
-        <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
-        <script src="~/js/chat.js"></script>
-    }
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
+    <script src="~/lib/microsoft/signalr-protocol-msgpack/dist/browser/signalr-protocol-msgpack.js"></script>
+    
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr-protocol-msgpack/7.0.5/signalr-protocol-msgpack.min.js"></script>
+        
+    <script src="~/js/chat.js"></script>
+    
+    @* <script src="js/WebRTC/permission.js"></script> *@
+    <script src="js/WebRTC/webrtc.js"></script>
+    @* <script src="js/WebRTC/voicechat.js"></script> *@
+
+
+}
