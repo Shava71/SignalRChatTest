@@ -1,32 +1,25 @@
 // Set variables
 let localStream;
 let remoteStream = new MediaStream();
+
+// Video HTML-elements
 const localVideo = document.getElementById("localVideo");
 const remoteVideo = document.getElementById("remoteVideo");
 
-// Set media stream
-const constraints = {video: true, audio: true };
-navigator.mediaDevices.getUserMedia(constraints)
-.then(stream => {
-    localVideo.srcObject = stream;
-    localStream = stream;
-
-    localStream.getTracks().forEach(track => {
-        peerConnection.addTrack(track, localStream);
-    });
-}).catch(error => {
-    console.error('Error accessing media devices:', error);
-    alert("Please turn on video-audio stream");
-});
-
-// Create WebRTC connection
+// Create WebRTC-peer connection
 const peerConnection = new RTCPeerConnection({
     iceServers: [
         { urls: 'stun:stun.l.google.com:19302' } // you can also use other stun servers 
     ]
 });
 
-// Display the remote stream 
+// Pending ICE candidates buffer
+let pendingCandidates = [];
+
+
+
+
+// Display the remote stream after receive remote track
 peerConnection.ontrack = event => {
     event.streams[0].getTracks().forEach(track => {
         remoteStream.addTrack(track);
@@ -51,28 +44,70 @@ SignalRConn.start()
 // Send offer via Signaling
 peerConnection.onicecandidate = (event) => {
     if(event.candidate) {
-        SignalRConn.invoke("SendSignal", JSON.stringify(event.candidate));
+        SignalRConn.invoke("SendSignal", JSON.stringify({candidate: event.candidate}))
+            .catch(err => {console.error("Error while sending ICE",err)});
     }
 }
 
 // Send answer via Signaling
-SignalRConn.on("ReceiveSignal", (username, message) => {
-    const signal = JSON.parse(message);
-    if(signal.type == "offer") {
-        peerConnection.setRemoteDescription(new RTCSessionDescription(signal));
-        peerConnection.createAnswer()
-            .then(answer => {peerConnection.setLocalDescription(answer);})
-            .then(() => {
-                SignalRConn.invoke("SendSignal", JSON.stringify(peerConnection.localDescription))
-            }).catch((err) => {console.log("error to send SDP",err)})
+SignalRConn.on("ReceiveSignal", async (username, message) => {
+    if(!message) {return;}
+    let signal;
+    try {
+        signal = JSON.parse(message);
+    }
+    catch (error) {
+        console.error("Invalid signal JSON", error);
+        return;
+    }
+
+    if(signal.type === "offer") {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(signal));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        await SignalRConn.invoke("SendSignal", JSON.stringify(peerConnection.localDescription))
+        // peerConnection.createAnswer()
+        //     .then(answer => {peerConnection.setLocalDescription(answer);})
+        //     .then(() => {
+        //         SignalRConn.invoke("SendSignal", JSON.stringify(peerConnection.localDescription))
+        //     }).catch((err) => {console.log("error to send SDP",err)})
+    }
+    else if (signal.type === "answer") {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(signal));
+        while(pendingCandidates.length > 0) {
+            await peerConnection.addIceCandidate(new RTCIceCandidate(pendingCandidates.shift()));
+        }
     }
     else if(signal.candidate) {
-        peerConnection.addIceCandidate(new RTCIceCandidate(signal));
+        if(peerConnection.remoteDescription) {
+            await peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate));
+        }
+        else{
+            console.log("Ice candidate pushed to queue until remoteDesccription is set");
+            pendingCandidates.push(signal.candidate);
+        }
     }
 })
 
+// GET and SET media stream
+const constraints = {video: true, audio: true };
+async function GetStream(){
+    navigator.mediaDevices.getUserMedia(constraints)
+        .then(stream => {
+            localVideo.srcObject = stream;
+            localStream = stream;
 
-function startCall(){
+            localStream.getTracks().forEach(track => {
+                peerConnection.addTrack(track, localStream);
+            });
+        }).catch(error => {
+        console.error('Error accessing media devices:', error);
+        // alert("Please turn on video-audio stream");
+    });
+}
+
+async function startCall(){
+    await GetStream();
     peerConnection.createOffer()
         .then(offer => {peerConnection.setLocalDescription(offer);})
         .then(() => {

@@ -123,6 +123,9 @@ connection.on("UpdateUserList", function (users) {
         button.classList.add("btn", "btn-outline-primary", "btn-sm");
         button.textContent = "Написать";
 
+        const buttonCall = document.createElement("button");
+        buttonCall.classList.add("btn", "btn-outline-primary", "btn-sm");
+        buttonCall.textContent = "Позвонить";
         // // Добавляем возможность отправки приватного сообщения
         // li.addEventListener("click", function() {
         //     const recipient = this.textContent;
@@ -138,6 +141,7 @@ connection.on("UpdateUserList", function (users) {
 
         li.appendChild(span);
         li.appendChild(button);
+        li.appendChild(buttonCall);
         userList.appendChild(li);
     });
 });

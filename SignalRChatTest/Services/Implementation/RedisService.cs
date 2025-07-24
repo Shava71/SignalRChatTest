@@ -1,4 +1,5 @@
 using System.Text.Json;
+using SignalRChatTest.Models;
 using StackExchange.Redis;
 using IDatabase = Microsoft.EntityFrameworkCore.Storage.IDatabase;
 
@@ -25,6 +26,16 @@ public class RedisService : IRedisService
         if (value.HasValue)
         {
             return JsonSerializer.Deserialize<T>(value);
+        }
+        return default;
+    }
+
+    public async Task<ChatUser> GetUserByIdAsync(string id)
+    {
+        var value = await _redis.StringGetAsync($"user:{id}:connection");
+        if (value.HasValue)
+        {
+            return JsonSerializer.Deserialize<ChatUser>(value);
         }
         return default;
     }

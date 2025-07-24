@@ -345,6 +345,6 @@
 /Users/mac/Desktop/pets/SignalRChatTest/SignalRChatTest/obj/Debug/net9.0/compressed/2b328j3ky3-deb10gkcqm.gz
 /Users/mac/Desktop/pets/SignalRChatTest/SignalRChatTest/obj/Debug/net9.0/compressed/hkua8l0qhj-kuhxcrezfm.gz
 /Users/mac/Desktop/pets/SignalRChatTest/SignalRChatTest/obj/Debug/net9.0/compressed/ppon1rll1r-jkj7y5a4cw.gz
-/Users/mac/Desktop/pets/SignalRChatTest/SignalRChatTest/obj/Debug/net9.0/compressed/53y0lo58qf-2xdkwx1723.gz
 /Users/mac/Desktop/pets/SignalRChatTest/SignalRChatTest/obj/Debug/net9.0/compressed/9ofbsy9we8-dstprk6to4.gz
-/Users/mac/Desktop/pets/SignalRChatTest/SignalRChatTest/obj/Debug/net9.0/compressed/9fbt0q1bom-7dzhoo4vmn.gz
+/Users/mac/Desktop/pets/SignalRChatTest/SignalRChatTest/obj/Debug/net9.0/compressed/53y0lo58qf-63hl12ajlv.gz
+/Users/mac/Desktop/pets/SignalRChatTest/SignalRChatTest/obj/Debug/net9.0/compressed/9fbt0q1bom-jz0ilzq64p.gz

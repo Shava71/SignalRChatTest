@@ -61,12 +61,22 @@
         <button id="cancelPrivateButton" class="btn btn-secondary" onclick="document.getElementById('privateMessageModal').style.display = 'none';">Отмена</button>
     </div>
     
-    <div class="WebRTCVoiceChat">
-        <button id="startCallBtn" class="btn btn-info">Начать звонок</button>
-        <h1>Video Chat</h1>
-        <video id="localVideo" autoplay playsinline muted></video>
-        <video id="remoteVideo" autoplay playsinline></video>
+    <div id="WebRTCVoiceChatModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border: 1px solid #ccc; box-shadow: 0 0 10px rgba(0,0,0,0.3);">
+        <div class="WebRTCVoiceChat">
+            @* <button id="startCallBtn" class="btn btn-info">Начать звонок</button> *@
+            <h1>Video Chat</h1>
+            <video id="localVideo" autoplay playsinline muted></video>
+            <video id="remoteVideo" autoplay playsinline></video>
+            <button id="ExitCall" type="button" class="btn btn-danger" style="border-radius: 50%">Выйти</button>
+        </div>
     </div>
+    <div id="CallModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border: 1px solid #ccc; box-shadow: 0 0 10px rgba(0,0,0,0.3);">
+        <div class="hstack gap-3">
+            <button id="acceptCall" type="button" class="btn btn-success" style="border-radius: 50%">Принять</button>
+            <button id="declineCall" type="button" class="btn btn-danger" style="border-radius: 50%">Отклонить</button>
+        </div>
+    </div>
+   
 }
 else
 {

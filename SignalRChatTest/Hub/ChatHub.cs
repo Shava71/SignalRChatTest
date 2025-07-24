@@ -83,7 +83,7 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
     {
         if (Context.User?.Identity == null || !Context.User.Identity.IsAuthenticated)
         {
-            Console.WriteLine("❌ Пользователь не аутентифицирован");
+            Console.WriteLine("Пользователь не аутентифицирован");
             throw new HubException("Unauthorized");
         }
         
