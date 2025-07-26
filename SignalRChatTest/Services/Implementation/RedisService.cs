@@ -30,13 +30,18 @@ public class RedisService : IRedisService
         return default;
     }
 
-    public async Task<ChatUser> GetUserByIdAsync(string id)
+    public async Task RemoveValueAsync(string key)
     {
-        var value = await _redis.StringGetAsync($"user:{id}:connection");
-        if (value.HasValue)
-        {
-            return JsonSerializer.Deserialize<ChatUser>(value);
-        }
-        return default;
+        await _redis.KeyDeleteAsync(key);
     }
+
+    // public async Task<ChatUser> GetUserByIdAsync(string id)
+    // {
+    //     var value = await _redis.StringGetAsync($"user:{id}:connection");
+    //     if (value.HasValue)
+    //     {
+    //         return JsonSerializer.Deserialize<ChatUser>(value);
+    //     }
+    //     return default;
+    // }
 }

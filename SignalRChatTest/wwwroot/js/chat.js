@@ -132,12 +132,22 @@ connection.on("UpdateUserList", function (users) {
         //     document.getElementById("recipientInput").value = recipient;
         //     document.getElementById("privateMessageModal").style.display = "block";
         // });
-        
+
         button.onclick = function () {
             document.getElementById("recipientInput").value = user.username;
             document.getElementById("recipientInputId").value = user.id;
             document.getElementById("privateMessageModal").style.display = "block";
         }
+        
+        buttonCall.onclick = function(){
+            SignalRConn.invoke("CallUser",user.id)
+                .then(()=>console.log("Starting call...",user.id))
+                .catch(err=>{console.error("Error while starting call...",err)});
+3
+            document.getElementById("callingToInput").textContent = user.username;
+            document.getElementById("callingToInputId").value = user.id;
+            document.getElementById("WebRTCVoiceChatModal").style.display = "block";
+        };
 
         li.appendChild(span);
         li.appendChild(button);

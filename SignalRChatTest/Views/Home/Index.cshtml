@@ -65,15 +65,30 @@
         <div class="WebRTCVoiceChat">
             @* <button id="startCallBtn" class="btn btn-info">Начать звонок</button> *@
             <h1>Video Chat</h1>
-            <video id="localVideo" autoplay playsinline muted></video>
-            <video id="remoteVideo" autoplay playsinline></video>
-            <button id="ExitCall" type="button" class="btn btn-danger" style="border-radius: 50%">Выйти</button>
+            <div class="hstack gap-1">
+                <label for="recipientInput">Звоним: </label>
+                <label id="callingToInput"></label>
+                @* <input type="text" id="callingToInput" class="form-control" readonly /> *@
+            </div>
+            
+            <input type="hidden" id="callingToInputId" class="form-control"/>
+            
+            <div class="hstack gap-3">
+                <video id="localVideo" autoplay playsinline muted></video>
+                <video id="remoteVideo" autoplay playsinline></video>
+            </div>
+           
+            <button id="ExitCall" type="button" class="btn btn-danger rounded-pill" onclick="exitCall()">Выйти</button>
         </div>
     </div>
     <div id="CallModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border: 1px solid #ccc; box-shadow: 0 0 10px rgba(0,0,0,0.3);">
+        <div class="hstack">
+            <label for="callFrom">Вам звонит: </label>
+            <label id="callFromInput"></label>
+        </div>
         <div class="hstack gap-3">
-            <button id="acceptCall" type="button" class="btn btn-success" style="border-radius: 50%">Принять</button>
-            <button id="declineCall" type="button" class="btn btn-danger" style="border-radius: 50%">Отклонить</button>
+            <button id="acceptCall" type="button" class="btn btn-success rounded-pill">Принять</button>
+            <button id="declineCall" type="button" class="btn btn-danger rounded-pill">Отклонить</button>
         </div>
     </div>
    
@@ -85,6 +100,15 @@ else
     </div>
 }
 
+<script>
+    async function exitCall() {
+        document.getElementById("WebRTCVoiceChatModal").style.display = "none";
+        // Дополнительно: остановить видео и аудио
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+        }
+    }
+</script>
 @section Scripts {
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
     <script src="~/lib/microsoft/signalr-protocol-msgpack/dist/browser/signalr-protocol-msgpack.js"></script>

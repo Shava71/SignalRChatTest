@@ -14,11 +14,14 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
     private static Dictionary<string, ChatUser> _connections = new Dictionary<string, ChatUser>();
     private IRedisService _redis;
     private IChatHistoryService _chatHistoryService;
+    private IConnectionManager _connectionManager;
 
-    public ChatHub(IChatHistoryService chatHistoryService, IRedisService redis)
+
+    public ChatHub(IChatHistoryService chatHistoryService, IRedisService redis, IConnectionManager connectionManager)
     {
         _redis = redis;
         _chatHistoryService = chatHistoryService;
+        _connectionManager = connectionManager;
     }
     
     public async Task GetMessageHistory()
@@ -73,8 +76,12 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
         };
         
         await _chatHistoryService.AddMessage(chatMessage);
+
+        foreach (string con in await _toUser.GetConnectionIds(HubType.Chat))
+        {
+            await Clients.Client(con).SendAsync("ReceivePrivateMessage", _fromUser, message, chatMessage.Timestamp);
+        }
         
-        await Clients.Client(_toUser.ConnectionId).SendAsync("ReceivePrivateMessage", _fromUser, message, chatMessage.Timestamp);
         await Clients.Caller.SendAsync("ReceivePrivateMessage", _fromUser, message, chatMessage.Timestamp);
        
     }
@@ -91,11 +98,12 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
         string username = Context.User.FindFirst(ClaimTypes.Name)!.Value;
         
         var connectionId = Context.ConnectionId;
-        ChatUser chatUser; ChatUser? prevUser = await _redis.GetValueAsync<ChatUser>($"user:{userid}:connection");
+        ChatUser chatUser; ChatUser? prevUser = await _connectionManager.GetUserByIdAsync(userid);
         if (prevUser != null)
         {
+            await _connectionManager.AddConnectionAsync(prevUser.Id.ToString(), HubType.Chat, connectionId);
             chatUser = prevUser;
-            chatUser.ConnectionId = connectionId;
+            await chatUser.AddConnectionId(HubType.Chat,connectionId);
         }
         else
         {
@@ -103,10 +111,11 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
             {
                 Id = Guid.Parse(userid),
                 Username = username,
-                ConnectionId = connectionId
             };
+            await chatUser.AddConnectionId(HubType.Chat,connectionId);
+            await _connectionManager.AddUserAsync(chatUser);
         }
-        
+  
         _connections[connectionId] = chatUser;
         
         await Clients.All.SendAsync("UpdateUserList", _connections.Values.Select(u => new
@@ -114,9 +123,6 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
             Username = u.Username,
             Id = u.Id.ToString(),
         }));
-
-        string key = $"user:{userid}:connection";
-        await _redis.SetValueAsync(key, chatUser);
         
         await Clients.All.SendAsync("UserConnected", chatUser.Username);
         await base.OnConnectedAsync();
@@ -126,6 +132,7 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
     {
         // await Clients.All.SendAsync("UserDisconnected", Context.ConnectionId);
         // await base.OnDisconnectedAsync(exception);
+        Guid currentUserId = Guid.Parse(Context.User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         if (_connections.TryGetValue(Context.ConnectionId, out var user))
         {
             _connections.Remove(Context.ConnectionId);
@@ -137,6 +144,7 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
          
             await Clients.All.SendAsync("UserDisconnected", user.Username);
         }
+        await _connectionManager.RemoveConnectionAsync(currentUserId.ToString(), HubType.Chat, Context.ConnectionId);
 
         await base.OnDisconnectedAsync(exception);
     }

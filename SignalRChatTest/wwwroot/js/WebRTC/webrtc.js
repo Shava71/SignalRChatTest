@@ -89,6 +89,41 @@ SignalRConn.on("ReceiveSignal", async (username, message) => {
     }
 })
 
+SignalRConn.on("IncomingCall", function(fromUserName, fromUserId) {
+    document.getElementById("callFromInput").textContent = fromUserName;
+    document.getElementById("CallModal").style.display = "block";
+    
+    document.getElementById("acceptCall").addEventListener("click", async () => {
+        SignalRConn.invoke("AcceptCall", fromUserId)
+            .catch(err => {console.error("Error while accepting call",err)});
+        document.getElementById("CallModal").style.display = "none";
+        
+        document.getElementById("WebRTCVoiceChatModal").style.display = "block";
+        document.getElementById("callingToInput").textContent = fromUserName;
+        document.getElementById("callingToInputId").value = fromUserId;
+
+        await startRTC();
+    })
+
+    document.getElementById("declineCall").addEventListener("click", async () => {
+        SignalRConn.invoke("DeclineCall", fromUserId)
+            .catch(err => {console.error("Error while decline call",err)});
+        document.getElementById("CallModal").style.display = "none";
+    })
+})
+
+SignalRConn.on("CallAccepted", function () {
+    console.log("Пользователь принял звонок.");
+    startCall(); 
+});
+
+SignalRConn.on("CallDeclined", function () {
+    console.log("Пользователь отклонил звонок.");
+    alert("Звонок отклонён");
+    document.getElementById("WebRTCVoiceChatModal").style.display = "none";
+
+});
+
 // GET and SET media stream
 const constraints = {video: true, audio: true };
 async function GetStream(){
@@ -106,7 +141,16 @@ async function GetStream(){
     });
 }
 
-async function startCall(){
+// async function startCall(id){
+//     SignalRConn.invoke("CallUser",id)
+//         .then(()=>console.log("Starting call...",id))
+//         .catch(err=>{console.error("Error while starting call...",err)});
+//
+//     document.getElementById("callingToInput").value = user.username;
+//     document.getElementById("callingToInputId").value = user.id;
+//     document.getElementById("WebRTCVoiceChatModal").style.display = "block";
+// }
+async function startRTC(){
     await GetStream();
     peerConnection.createOffer()
         .then(offer => {peerConnection.setLocalDescription(offer);})
@@ -114,6 +158,6 @@ async function startCall(){
             SignalRConn.invoke("SendSignal", JSON.stringify(peerConnection.localDescription))
         }).catch((err) => {console.log("error to send offer",err)})
 }
-document.getElementById("startCallBtn").addEventListener("click", startCall);
+// document.getElementById("startCallBtn").addEventListener("click", startCall);
 
 

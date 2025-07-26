@@ -7,6 +7,7 @@ public interface IRedisService
 {
     // private readonly IDatabase _redisDatabase;
     public Task SetValueAsync<T>(string key, T value);
+    public Task RemoveValueAsync(string key);
     public Task<T?> GetValueAsync<T>(string key);
-    public Task<ChatUser> GetUserByIdAsync(string id);
+    // public Task<ChatUser> GetUserByIdAsync(string id);
 }

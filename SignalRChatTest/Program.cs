@@ -114,6 +114,8 @@ builder.Services.AddSignalR()
     builder.Services.AddSingleton<JwtService>();
     builder.Services.AddScoped<IAuthService, AuthService>();
     builder.Services.AddScoped<IChatHistoryService, ChatHistoryService>();
+
+    builder.Services.AddSingleton<IConnectionManager, ConnectionManager>();
 }
 
 
