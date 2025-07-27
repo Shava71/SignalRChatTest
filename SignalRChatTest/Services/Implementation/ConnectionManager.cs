@@ -30,7 +30,7 @@ public class ConnectionManager : IConnectionManager
     {
         ChatUser? user = await GetUserByIdAsync(userId);
         
-        user.AddConnectionId(hubType, connectionId);
+        await user.AddConnectionId(hubType, connectionId);
         await _redisService.SetValueAsync($"{Prefix}{userId}{Postfix}", JsonSerializer.Serialize(user));
     }
     

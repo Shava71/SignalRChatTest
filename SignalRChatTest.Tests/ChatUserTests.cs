@@ -3,25 +3,27 @@ namespace SignalRChatTest.Tests;
 
 public class ChatUserTests
 {
-    private Task CheckTwoUserEquals(ChatUser wantedUser, ChatUser actual)
-    {
-        // Assert.Equal(wantedUser.Id, actual.Id);
-        // Assert.Equal(wantedUser.Username, actual.Username);
-        Assert.Equal(wantedUser, actual, Comparer.Get<ChatUser>((u1, u2) => u1.Id == u2.Id && u1.Username == u2.Username));
-        Assert.NotNull(actual.ConnectionId);
-
-        foreach (var ids in wantedUser.ConnectionId)
-        {
-            Assert.True(actual.ConnectionId.ContainsKey(ids.Key));
-            Assert.Equal(ids.Value, actual.ConnectionId[ids.Key]);
-        }
-
-        return Task.CompletedTask;
-    }
+    // private Task CheckTwoUserEquals(ChatUser wantedUser, ChatUser actual)
+    // {
+    //     // Assert.Equal(wantedUser.Id, actual.Id);
+    //     // Assert.Equal(wantedUser.Username, actual.Username);
+    //     // Assert
+    //     Assert.Equal(wantedUser, actual, Comparer.Get<ChatUser>((u1, u2) => u1.Id == u2.Id && u1.Username == u2.Username));
+    //     Assert.NotNull(actual.ConnectionId);
+    //
+    //     foreach (var ids in wantedUser.ConnectionId)
+    //     {
+    //         Assert.True(actual.ConnectionId.ContainsKey(ids.Key));
+    //         Assert.Equal(ids.Value, actual.ConnectionId[ids.Key]);
+    //     }
+    //
+    //     return Task.CompletedTask;
+    // }
     
     [Fact]
     public async Task AddConnectionId_Correctly()
     {
+        // Arrange
         Guid idUser = Guid.NewGuid();
         string username = "user";
 
@@ -45,8 +47,8 @@ public class ChatUserTests
             Username = username,
             ConnectionId = wantedConnectionIds
         };
-        
-        await CheckTwoUserEquals(wantedUser, user);
+        // Act
+        await EqualsMethods.EqualsMethods.CheckTwoUserEquals(wantedUser, user);
     }
     
     [Fact]
@@ -77,7 +79,7 @@ public class ChatUserTests
             }
         };
         
-        await CheckTwoUserEquals(wantedUser, user);
+        await EqualsMethods.EqualsMethods.CheckTwoUserEquals(wantedUser, user);
     }
    
 }
