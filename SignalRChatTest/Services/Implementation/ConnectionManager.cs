@@ -38,14 +38,14 @@ public class ConnectionManager : IConnectionManager
     {
         ChatUser? user = await GetUserByIdAsync(userId);
         
-        user.RemoveConnectionId(hubType, connectionId);
+        await user.RemoveConnectionId(hubType, connectionId);
         await _redisService.SetValueAsync($"{Prefix}{userId}{Postfix}", JsonSerializer.Serialize(user));
     }
     
     public async Task<ChatUser?> GetUserByIdAsync(string userId)
     {
         ChatUser? user = await _redisService.GetValueAsync<ChatUser>($"{Prefix}{userId}{Postfix}");
-        return user ?? new ChatUser();
+        return user;
     }
     
     
