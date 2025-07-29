@@ -17,8 +17,8 @@ public class ConnectionManager : IConnectionManager
 
     public async Task AddUserAsync(ChatUser user)
     {
-        var serialized = JsonSerializer.Serialize(user);
-        await _redisService.SetValueAsync($"{Prefix}{user.Id.ToString()}{Postfix}", serialized);
+        // var serialized = JsonSerializer.Serialize(user);
+        await _redisService.SetValueAsync($"{Prefix}{user.Id.ToString()}{Postfix}", user);
     }
 
     public async Task RemoveUserAsync(string userId)
@@ -31,7 +31,7 @@ public class ConnectionManager : IConnectionManager
         ChatUser? user = await GetUserByIdAsync(userId);
         
         await user.AddConnectionId(hubType, connectionId);
-        await _redisService.SetValueAsync($"{Prefix}{userId}{Postfix}", JsonSerializer.Serialize(user));
+        await _redisService.SetValueAsync($"{Prefix}{userId}{Postfix}", user);
     }
     
     public async Task RemoveConnectionAsync(string userId, HubType hubType, string connectionId)
@@ -39,7 +39,7 @@ public class ConnectionManager : IConnectionManager
         ChatUser? user = await GetUserByIdAsync(userId);
         
         await user.RemoveConnectionId(hubType, connectionId);
-        await _redisService.SetValueAsync($"{Prefix}{userId}{Postfix}", JsonSerializer.Serialize(user));
+        await _redisService.SetValueAsync($"{Prefix}{userId}{Postfix}", user);
     }
     
     public async Task<ChatUser?> GetUserByIdAsync(string userId)

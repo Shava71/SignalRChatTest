@@ -43,11 +43,15 @@ public class VoiceHub : Microsoft.AspNetCore.SignalR.Hub
 
         // ChatUser toUser = await _redis.GetUserByIdAsync(toUserId);
         ChatUser? toUser = await _connectionManager.GetUserByIdAsync(toUserId);
-        Console.WriteLine($"You call to: {toUser.Username} ({toUser.Id}): conId = {toUser.ConnectionId}");
-        foreach (string con in await toUser.GetConnectionIds(HubType.Voice))
-        {
-            await Clients.User(con).SendAsync("IncomingCall", fromUserName, fromUserId);   
-        }
+        // List<string> conns = await toUser.GetConnectionIds(HubType.Voice);
+        //
+        // Console.WriteLine($"You call to: {toUser.Username} ({toUser.Id}): conId = {string.Join("; ",conns)}");
+        // foreach (string con in conns)
+        // {
+        //     await Clients.Client(con).SendAsync("IncomingCall", fromUserName, fromUserId);   
+        // }
+        Console.WriteLine("toUserId for calling: " + toUserId);
+        await Clients.User(toUserId).SendAsync("IncomingCall", fromUserName, fromUserId); 
     }
 
     public async Task AcceptCall(string callerId)
@@ -56,10 +60,11 @@ public class VoiceHub : Microsoft.AspNetCore.SignalR.Hub
         // ChatUser toUser = await _redis.GetUserByIdAsync(callerId);
         // await Clients.User(toUser.ConnectionId).SendAsync("CallAccepted");
         ChatUser? toUser = await _connectionManager.GetUserByIdAsync(callerId);
-        foreach (string con in await toUser.GetConnectionIds(HubType.Voice))
-        {
-            await Clients.User(con).SendAsync("CallAccepted");
-        }
+        // foreach (string con in await toUser.GetConnectionIds(HubType.Voice))
+        // {
+        //     await Clients.Client(con).SendAsync("CallAccepted");
+        // }
+        await Clients.User(callerId).SendAsync("CallAccepted");
     }
 
     public async Task DeclineCall(string callerId)
@@ -68,10 +73,12 @@ public class VoiceHub : Microsoft.AspNetCore.SignalR.Hub
         // await Clients.User(toUser.ConnectionId).SendAsync("CallDeclined");
         
         ChatUser? toUser = await _connectionManager.GetUserByIdAsync(callerId);
-        foreach (string con in await toUser.GetConnectionIds(HubType.Voice))
-        {
-            await Clients.User(con).SendAsync("CallDeclined");
-        }
+        // foreach (string con in await toUser.GetConnectionIds(HubType.Voice))
+        // {
+        //     await Clients.Client(con).SendAsync("CallDeclined");
+        // }
+        await Clients.User(callerId).SendAsync("CallDeclined");
+
     }
 
     public override async Task OnConnectedAsync()
@@ -111,7 +118,7 @@ public class VoiceHub : Microsoft.AspNetCore.SignalR.Hub
     {
         string userid = Context.User!.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 
-        _connectionManager.RemoveConnectionAsync(userid, HubType.Voice, Context.ConnectionId);
+        await _connectionManager.RemoveConnectionAsync(userid, HubType.Voice, Context.ConnectionId);
         await base.OnDisconnectedAsync(exception);
     }
 }

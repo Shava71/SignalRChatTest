@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using MessagePack;
 using MessagePack.Resolvers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -100,6 +101,10 @@ builder.Services.AddSignalR()
     .AddHubOptions<ChatHub>(options =>
     {
         options.EnableDetailedErrors = true;
+    })
+    .AddJsonProtocol(options =>
+    {
+        options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 
 // repositories DI

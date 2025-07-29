@@ -102,7 +102,8 @@ SignalRConn.on("IncomingCall", function(fromUserName, fromUserId) {
         document.getElementById("callingToInput").textContent = fromUserName;
         document.getElementById("callingToInputId").value = fromUserId;
 
-        await startRTC();
+        // await startRTC();
+        await startCallAnswer();
     })
 
     document.getElementById("declineCall").addEventListener("click", async () => {
@@ -112,9 +113,10 @@ SignalRConn.on("IncomingCall", function(fromUserName, fromUserId) {
     })
 })
 
-SignalRConn.on("CallAccepted", function () {
+SignalRConn.on("CallAccepted", async function () {
     console.log("Пользователь принял звонок.");
-    startCall(); 
+    // await startRTC();
+    await startCallOffer();
 });
 
 SignalRConn.on("CallDeclined", function () {
@@ -127,18 +129,52 @@ SignalRConn.on("CallDeclined", function () {
 // GET and SET media stream
 const constraints = {video: true, audio: true };
 async function GetStream(){
-    navigator.mediaDevices.getUserMedia(constraints)
-        .then(stream => {
-            localVideo.srcObject = stream;
-            localStream = stream;
+    // navigator.mediaDevices.getUserMedia(constraints)
+    //     .then(stream => {
+    //         localVideo.srcObject = stream;
+    //         localStream = stream;
+    //
+    //         localStream.getTracks().forEach(track => {
+    //             peerConnection.addTrack(track, localStream);
+    //         });
+    //     }).catch(error => {
+    //     console.error('Error accessing media devices:', error);
+    //     // alert("Please turn on video-audio stream");
+    // });
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia(constraints)
+        localVideo.srcObject = stream;
+        localStream = stream;
 
-            localStream.getTracks().forEach(track => {
-                peerConnection.addTrack(track, localStream);
-            });
-        }).catch(error => {
-        console.error('Error accessing media devices:', error);
-        // alert("Please turn on video-audio stream");
-    });
+        localStream.getTracks().forEach(track => {
+            peerConnection.addTrack(track, localStream);
+        });
+    }
+   catch(err) {
+       console.error('Error accessing media devices:', err);
+   }
+}
+
+async function startCallOffer() {
+    try {
+        await GetStream();
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        
+        if(SignalRConn.state !== signalR.HubConnectionState.Connected) {
+            console.warn("SignalRConn.state was not connected");
+            return;
+        }
+        
+        await SignalRConn.invoke("sendSignal", JSON.stringify(peerConnection.localDescription))
+    }
+    catch(err) {
+        console.error("Error while create offer", err);
+    }
+}
+
+async function startCallAnswer() {
+    await GetStream();
 }
 
 // async function startCall(id){
@@ -150,14 +186,14 @@ async function GetStream(){
 //     document.getElementById("callingToInputId").value = user.id;
 //     document.getElementById("WebRTCVoiceChatModal").style.display = "block";
 // }
-async function startRTC(){
-    await GetStream();
-    peerConnection.createOffer()
-        .then(offer => {peerConnection.setLocalDescription(offer);})
-        .then(() => {
-            SignalRConn.invoke("SendSignal", JSON.stringify(peerConnection.localDescription))
-        }).catch((err) => {console.log("error to send offer",err)})
-}
+// async function startRTC(){
+//     await GetStream();
+//     peerConnection.createOffer()
+//         .then(offer => {peerConnection.setLocalDescription(offer);})
+//         .then(() => {
+//             SignalRConn.invoke("SendSignal", JSON.stringify(peerConnection.localDescription))
+//         }).catch((err) => {console.log("error to send offer",err)})
+// }
 // document.getElementById("startCallBtn").addEventListener("click", startCall);
 
 

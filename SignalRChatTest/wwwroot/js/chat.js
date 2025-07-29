@@ -140,10 +140,15 @@ connection.on("UpdateUserList", function (users) {
         }
         
         buttonCall.onclick = function(){
+            if(SignalRConn.state !== signalR.HubConnectionState.Connected) {
+                console.warn("SignalRConn.state was not connected");
+                return;
+            }
+            
             SignalRConn.invoke("CallUser",user.id)
                 .then(()=>console.log("Starting call...",user.id))
                 .catch(err=>{console.error("Error while starting call...",err)});
-3
+
             document.getElementById("callingToInput").textContent = user.username;
             document.getElementById("callingToInputId").value = user.id;
             document.getElementById("WebRTCVoiceChatModal").style.display = "block";
